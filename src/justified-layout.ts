@@ -20,21 +20,18 @@ export class JustifiedLayout {
         let top = 0.0;
 
         for (let i = 0; i <= aspectRatios.length; i++) {
-            console.log('item', i);
             const aspectRatio = aspectRatios[i];
             const boxWidth = aspectRatio * rowHeight;
             curRowWidth += boxWidth;
 
             // there are no more boxes that can fit in this row
             if (curRowWidth > rowWidth && i > 0) {
-                console.log('more');
                 let aspectRatioRow = aspectRatios.slice(rowStartIdx, i);
 
                 // treat the row's boxes as a single entity and scale them to fit the row width
                 const totalAspectRatio = aspectRatioRow.reduce((sum, ar) => sum + ar, 0);
                 let spacingPixels = spacing * (aspectRatioRow.length - 1);
                 let scaledRowHeight = Math.min((rowWidth - spacingPixels) / totalAspectRatio, maxRowHeight);
-                console.log(rowHeight, scaledRowHeight);
 
                 let actualRowWidth = spacingPixels;
                 let left = 0.0;

@@ -1,9 +1,10 @@
-import { JustifiedLayout } from '@immich/justified-layout-wasm';
+// import { JustifiedLayout } from '@immich/justified-layout-wasm';
+import { JustifiedLayout } from './justified-layout';
 import justifiedLayout from 'justified-layout';
 
-const rowHeight = 75;
+const rowHeight = 100;
 const spacing = 4;
-const heightTolerance = 0.15;
+const heightTolerance = 0.25;
 
 // ---
 
@@ -14,6 +15,10 @@ let containerWidth = 0;
 
 const container = document.createElement('div');
 app.appendChild(container);
+
+const info = document.createElement('p');
+info.innerHTML = `spacing: ${spacing}<br>rowHeight: ${rowHeight} ± ${heightTolerance} (${rowHeight - (rowHeight * heightTolerance)}..${rowHeight + (rowHeight * heightTolerance)})`;
+app.appendChild(info);
 
 const galleryOld = document.createElement('div');
 galleryOld.style.background = 'lightgrey';
@@ -53,7 +58,7 @@ function updateGallery() {
         containerPadding: 0,
     });
 
-    galleryOld.style.width = containerWidth + 'px';
+    // galleryOld.style.width = containerWidth + 'px';
     galleryOld.style.height = layoutOld.containerHeight + "px";
 
     for (let i = 0; i < galleryOldItems.length; i++) {
@@ -67,24 +72,24 @@ function updateGallery() {
     }
 
     // @immich/justified-layout-wasm
-    const layoutNew = new JustifiedLayout(new Float32Array(aspectRatios), {
+    const layoutNew = new JustifiedLayout(aspectRatios, {
         rowHeight,
         rowWidth: containerWidth,
         spacing,
         heightTolerance,
     });
 
-    galleryNew.style.width = layoutNew.containerWidth + 'px';
+    // galleryNew.style.width = Math.max(containerWidth, layoutNew.containerWidth) + 'px';
     galleryNew.style.height = layoutNew.containerHeight + "px";
 
     for (let i = 0; i < galleryNewItems.length; i++) {
         const item = galleryNewItems[i];
         item.style.position = "absolute";
-        item.style.top = layoutNew.getTop(i) + "px";
-        item.style.left = layoutNew.getLeft(i) + "px";
-        item.style.width = layoutNew.getWidth(i) + "px";
-        item.style.height = layoutNew.getHeight(i) + "px";
-        item.innerHTML = `${layoutNew.getWidth(i)}x${layoutNew.getHeight(i)}`;
+        item.style.top = layoutNew.boxes[i].top + "px";
+        item.style.left = layoutNew.boxes[i].left + "px";
+        item.style.width = layoutNew.boxes[i].width + "px";
+        item.style.height = layoutNew.boxes[i].height + "px";
+        item.innerHTML = `${layoutNew.boxes[i].width}x${layoutNew.boxes[i].height}`;
     }
 }
 
