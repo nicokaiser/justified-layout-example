@@ -10,4 +10,5 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['@immich/justified-layout-wasm'],
   },
+  base: '/justified-layout-example/'
 });
