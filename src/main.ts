@@ -11,7 +11,7 @@ const aspectRatios = [1.5, 0.6666666666666666, 1.3274336283185841, 1.33333333333
 const app = document.getElementById("app");
 
 const container = document.createElement('div');
-app.appendChild(container);
+app?.appendChild(container);
 
 // justified-layout
 const headerFlickr = document.createElement('h3');
