@@ -13,7 +13,7 @@ export class JustifiedLayout {
     constructor(aspectRatios: number[], { rowHeight, rowWidth, spacing, heightTolerance }: LayoutOptions) {
         if (aspectRatios.length === 0) return;
 
-        let maxRowHeight = rowHeight * (1.0 + heightTolerance);
+        const maxRowHeight = rowHeight * (1 + heightTolerance);
         let curRowWidth = 0.0;
         let maxActualRowWidth = 0.0;
         let rowStartIdx = 0;
@@ -26,12 +26,12 @@ export class JustifiedLayout {
 
             // there are no more boxes that can fit in this row
             if (curRowWidth > rowWidth && i > 0) {
-                let aspectRatioRow = aspectRatios.slice(rowStartIdx, i);
+                const aspectRatioRow = aspectRatios.slice(rowStartIdx, i);
 
                 // treat the row's boxes as a single entity and scale them to fit the row width
                 const totalAspectRatio = aspectRatioRow.reduce((sum, ar) => sum + ar, 0);
-                let spacingPixels = spacing * (aspectRatioRow.length - 1);
-                let scaledRowHeight = Math.min((rowWidth - spacingPixels) / totalAspectRatio, maxRowHeight);
+                const spacingPixels = spacing * (aspectRatioRow.length - 1);
+                const scaledRowHeight = Math.min((rowWidth - spacingPixels) / totalAspectRatio, maxRowHeight);
 
                 let actualRowWidth = spacingPixels;
                 let left = 0.0;
