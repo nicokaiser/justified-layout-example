@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "@immich/justified-layout-wasm": "^0.1.2",
+    "@types/justified-layout": "^4.1.4",
     "justified-layout": "^4.1.0",
     "typescript": "~5.7.2",
     "vite": "^6.0.11",
