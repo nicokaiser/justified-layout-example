@@ -7,7 +7,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@immich/justified-layout-wasm": "^0.1.2",
+    "@immich/justified-layout-wasm": "^0.2.1",
     "@types/justified-layout": "^4.1.4",
     "justified-layout": "^4.1.0",
     "typescript": "~5.7.2",
