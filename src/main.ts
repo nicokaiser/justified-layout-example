@@ -2,8 +2,8 @@ import { JustifiedLayout as JustifiedLayoutWasm } from '@immich/justified-layout
 import { JustifiedLayout } from './justified-layout';
 import justifiedLayout from 'justified-layout';
 
-const rowHeight = 120;
-const spacing = 4;
+const rowHeight = 270;
+const spacing = 10;
 const heightTolerance = 0.25;
 
 const aspectRatios = [1.5, 0.6666666666666666, 1.3274336283185841, 1.3333333333333333, 0.7516666666666667, 1.5, 0.665, 1.4018691588785046, 1.3392857142857142];
