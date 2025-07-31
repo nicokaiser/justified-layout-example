@@ -7,7 +7,7 @@ import justifiedLayout from "justified-layout";
 
 let rowHeight = 235; // viewport.with < 850 => 100
 const spacing = 2;
-const heightTolerance = 0.15;
+const heightTolerance = 0.3;
 
 const aspectRatios = [
   1.5, 0.6666666666666666, 1.3274336283185841, 1.3333333333333333,

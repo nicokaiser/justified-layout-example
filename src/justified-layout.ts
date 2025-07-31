@@ -55,7 +55,6 @@ function getJustifiedLayout(aspectRatios: number[], options: LayoutOptions) {
   });
   const minRowHeight = options.rowHeight * (1 - options.heightTolerance);
   const maxRowHeight = options.rowHeight * (1 + options.heightTolerance);
-  const maxEdgeRowHeight = options.rowHeight * 2;
   let curAspectRatio = 0;
   let rowAspectRatio = 0;
   let maxActualRowWidth = 0;
@@ -84,7 +83,7 @@ function getJustifiedLayout(aspectRatios: number[], options: LayoutOptions) {
       const spacingPixels = options.spacing * (aspectRatioRow.length - 1);
       const scaledRowHeight = Math.min(
         (options.rowWidth - spacingPixels) / totalAspectRatio,
-        maxEdgeRowHeight,
+        maxRowHeight,
       );
 
       let actualRowWidth = spacingPixels;
@@ -119,10 +118,8 @@ function getJustifiedLayout(aspectRatios: number[], options: LayoutOptions) {
   const totalAspectRatio =
     rowAspectRatio - spacingAspectRatio * aspectRatioRow.length;
   const spacingPixels = options.spacing * (aspectRatioRow.length - 1);
-  const scaledRowHeight = Math.min(
-    (options.rowWidth - spacingPixels) / totalAspectRatio,
-    maxRowHeight,
-  );
+  let scaledRowHeight = (options.rowWidth - spacingPixels) / totalAspectRatio;
+  if (scaledRowHeight > maxRowHeight) scaledRowHeight = options.rowHeight;
 
   let actualRowWidth = spacingPixels;
   let left = 0;
