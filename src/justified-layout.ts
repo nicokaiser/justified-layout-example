@@ -1,107 +1,146 @@
-interface LayoutOptions {
-    rowHeight: number;
-    rowWidth: number;
-    spacing: number;
-    heightTolerance: number;
-};
+export interface LayoutOptions {
+  rowHeight: number;
+  rowWidth: number;
+  spacing: number;
+  heightTolerance: number;
+}
 
 export class JustifiedLayout {
-    boxes: { top: number; left: number; width: number; height: number }[] = [];
-    containerWidth = 0;
-    containerHeight = 0;
+  layout: number[];
 
-    constructor(aspectRatios: number[], { rowHeight, rowWidth, spacing, heightTolerance }: LayoutOptions) {
-        if (aspectRatios.length === 0) return;
+  constructor(aspectRatios: number[], options: LayoutOptions) {
+    this.layout =
+      aspectRatios.length === 0
+        ? [0, 0, 0, 0]
+        : getJustifiedLayout(aspectRatios, options);
+  }
 
-        const minRowHeight = rowHeight * (1 - heightTolerance);
-        const maxRowHeight = rowHeight * (1 + heightTolerance);
-        let curRowWidth = 0.0;
-        let maxActualRowWidth = 0.0;
-        let rowStartIdx = 0;
-        let top = 0.0;
+  get containerWidth() {
+    return this.layout[0];
+  }
 
-        for (let i = 0; i <= aspectRatios.length; i++) {
-            const aspectRatio = aspectRatios[i];
-            const boxWidth = aspectRatio * rowHeight;
-            curRowWidth += boxWidth;
+  get containerHeight() {
+    return this.layout[1];
+  }
 
-            // there are no more boxes that can fit in this row
-            if (curRowWidth > rowWidth && i > 0) {
-                const aspectRatioRow = aspectRatios.slice(rowStartIdx, i);
+  getTop(boxIdx: number) {
+    return this.layout[boxIdx * 4 + 4]; // the first 4 elements are containerWidth, containerHeight, padding, padding
+  }
 
-                // treat the row's boxes as a single entity and scale them to fit the row width
-                const totalAspectRatio = aspectRatioRow.reduce((sum, ar) => sum + ar, 0);
-                const spacingPixels = spacing * (aspectRatioRow.length - 1);
+  getLeft(boxIdx: number) {
+    return this.layout[boxIdx * 4 + 5];
+  }
 
-                let actualRowWidth = spacingPixels;
-                let scaledRowHeight = (rowWidth - spacingPixels) / totalAspectRatio;
+  getWidth(boxIdx: number) {
+    return this.layout[boxIdx * 4 + 6];
+  }
 
-                if (scaledRowHeight > maxRowHeight) {
-                    const scaledRowHeight2 = (rowWidth - spacingPixels - spacing) / (totalAspectRatio + aspectRatios[i]);
+  getHeight(boxIdx: number) {
+    return this.layout[boxIdx * 4 + 7];
+  }
 
-                    if (scaledRowHeight2 >= minRowHeight) {
-                        // scaling down is better in this case
-                        scaledRowHeight = scaledRowHeight2;
-                        actualRowWidth += spacing;
-                        aspectRatioRow.push(aspectRatios[i]);
-                        i++;
-                    } else {
-                        console.log('giving up');
-                        scaledRowHeight = maxRowHeight;
-                    }
-                }
+  getPosition(boxIdx: number) {
+    return {
+      top: this.layout[boxIdx * 4 + 4],
+      left: this.layout[boxIdx * 4 + 5],
+      width: this.layout[boxIdx * 4 + 6],
+      height: this.layout[boxIdx * 4 + 7],
+    };
+  }
+}
 
-                let left = 0;
+function getJustifiedLayout(aspectRatios: number[], options: LayoutOptions) {
+  const positions: number[] = Array.from({
+    length: aspectRatios.length * 4 + 4,
+  });
+  const minRowHeight = options.rowHeight * (1 - options.heightTolerance);
+  const maxRowHeight = options.rowHeight * (1 + options.heightTolerance);
+  let curAspectRatio = 0;
+  let rowAspectRatio = 0;
+  let maxActualRowWidth = 0;
+  let rowStartIdx = 0;
+  let top = 0;
+  const maxRowAspectRatio = options.rowWidth / minRowHeight;
+  const targetRowAspectRatio = options.rowWidth / options.rowHeight;
+  const spacingAspectRatio = options.spacing / options.rowHeight;
 
-                for (let j = 0; j < aspectRatioRow.length; j++) {
-                    let width = aspectRatioRow[j] * scaledRowHeight;
-                    this.boxes[rowStartIdx + j] = {
-                        top: Math.round(top),
-                        left: Math.round(left),
-                        width: Math.round(width),
-                        height: Math.round(scaledRowHeight)
-                    }
-                    left += width + spacing;
-                    actualRowWidth += width;
-                }
-                top += scaledRowHeight + spacing;
-                maxActualRowWidth = Math.max(actualRowWidth, maxActualRowWidth);
-                rowStartIdx = i;
-                curRowWidth = boxWidth;
-            }
+  let rowDiff = targetRowAspectRatio;
+  for (let i = 0; i < aspectRatios.length; i++) {
+    const aspectRatio = aspectRatios[i];
+    curAspectRatio += aspectRatio;
+    const curDiff = Math.abs(curAspectRatio - targetRowAspectRatio);
 
-            curRowWidth += spacing;
-        }
+    // there are no more boxes that can fit in this row
+    if (
+      (curAspectRatio > maxRowAspectRatio || curDiff > rowDiff) &&
+      i > rowStartIdx
+    ) {
+      const aspectRatioRow = aspectRatios.slice(rowStartIdx, i);
 
-        if (rowStartIdx < aspectRatios.length) {
-            // this is the same as in the for loop and processes the last row
-            // inlined because it ends up producing much better assembly
-            const aspectRatioRow = aspectRatios.slice(rowStartIdx);
+      // treat the row's boxes as a single entity and scale them to fit the row width
+      const totalAspectRatio =
+        rowAspectRatio - spacingAspectRatio * aspectRatioRow.length;
+      const spacingPixels = options.spacing * (aspectRatioRow.length - 1);
+      const scaledRowHeight = Math.min(
+        (options.rowWidth - spacingPixels) / totalAspectRatio,
+        maxRowHeight,
+      );
 
-            const totalAspectRatio = aspectRatioRow.reduce((sum, ar) => sum + ar, 0);
-            const spacingPixels = spacing * (aspectRatioRow.length - 1);
-            const scaledRowHeight = Math.min((rowWidth - spacingPixels) / totalAspectRatio, maxRowHeight);
+      let actualRowWidth = spacingPixels;
+      let left = 0;
 
-            let actualRowWidth = spacingPixels;
-            let left = 0;
-
-            for (let j = 0; j < aspectRatioRow.length; j++) {
-                let width = aspectRatioRow[j] * scaledRowHeight;
-                this.boxes[rowStartIdx + j] = {
-                    top: Math.round(top),
-                    left: Math.round(left),
-                    width: Math.round(width),
-                    height: Math.round(scaledRowHeight)
-                }
-                left += width + spacing;
-                actualRowWidth += width;
-            }
-
-            this.containerWidth = Math.ceil(Math.max(actualRowWidth, maxActualRowWidth));
-            this.containerHeight = Math.ceil(top + scaledRowHeight);
-        } else {
-            this.containerWidth = Math.ceil(maxActualRowWidth);
-            this.containerHeight = Math.ceil(top - spacing);
-        }
+      // eslint-disable-next-line unicorn/no-for-loop
+      for (let j = 0; j < aspectRatioRow.length; j++) {
+        const width = aspectRatioRow[j] * scaledRowHeight;
+        const posIndex = (rowStartIdx + j) * 4 + 4;
+        positions[posIndex + 0] = top;
+        positions[posIndex + 1] = left;
+        positions[posIndex + 2] = width;
+        positions[posIndex + 3] = scaledRowHeight;
+        left += width + options.spacing;
+        actualRowWidth += width;
+      }
+      top += scaledRowHeight + options.spacing;
+      maxActualRowWidth = Math.max(actualRowWidth, maxActualRowWidth);
+      rowStartIdx = i;
+      curAspectRatio = aspectRatio;
+      rowDiff = Math.abs(curAspectRatio - targetRowAspectRatio);
+    } else {
+      rowDiff = curDiff;
     }
+    curAspectRatio += spacingAspectRatio;
+    rowAspectRatio = curAspectRatio;
+  }
+
+  // this is the same as in the for loop and processes the last row
+  // inlined because it ends up producing much better assembly
+  const aspectRatioRow = aspectRatios.slice(rowStartIdx);
+  const totalAspectRatio =
+    rowAspectRatio - spacingAspectRatio * aspectRatioRow.length;
+  const spacingPixels = options.spacing * (aspectRatioRow.length - 1);
+  const scaledRowHeight = Math.min(
+    (options.rowWidth - spacingPixels) / totalAspectRatio,
+    maxRowHeight,
+  );
+
+  let actualRowWidth = spacingPixels;
+  let left = 0;
+
+  // eslint-disable-next-line unicorn/no-for-loop
+  for (let j = 0; j < aspectRatioRow.length; j++) {
+    const width = aspectRatioRow[j] * scaledRowHeight;
+    const posIndex = (rowStartIdx + j) * 4 + 4;
+    positions[posIndex + 0] = top;
+    positions[posIndex + 1] = left;
+    positions[posIndex + 2] = width;
+    positions[posIndex + 3] = scaledRowHeight;
+    left += width + options.spacing;
+    actualRowWidth += width;
+  }
+
+  // SAFETY: these indices are guaranteed to be within the vector's bounds
+  positions[0] = Math.max(actualRowWidth, maxActualRowWidth);
+  positions[1] = top + scaledRowHeight;
+
+  return positions;
 }
