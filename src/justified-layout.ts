@@ -118,8 +118,13 @@ function getJustifiedLayout(aspectRatios: number[], options: LayoutOptions) {
   const totalAspectRatio =
     rowAspectRatio - spacingAspectRatio * aspectRatioRow.length;
   const spacingPixels = options.spacing * (aspectRatioRow.length - 1);
-  let scaledRowHeight = (options.rowWidth - spacingPixels) / totalAspectRatio;
-  if (scaledRowHeight > maxRowHeight) scaledRowHeight = options.rowHeight;
+  const baseRowHeight = (options.rowWidth - spacingPixels) / totalAspectRatio;
+  const scaledRowHeight =
+    baseRowHeight > maxRowHeight
+      ? rowStartIdx > 0
+        ? Math.min(baseRowHeight, positions[rowStartIdx * 4 + 3])
+        : Math.min(baseRowHeight, maxRowHeight)
+      : baseRowHeight;
 
   let actualRowWidth = spacingPixels;
   let left = 0;
