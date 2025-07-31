@@ -19,6 +19,11 @@ const app = document.getElementById("app");
 const container = document.createElement("div");
 app?.appendChild(container);
 
+// info
+const info = document.createElement("p");
+info.id = "info";
+container.appendChild(info);
+
 // justified-layout
 const headerFlickr = document.createElement("h3");
 headerFlickr.innerHTML = "justified-layout";
@@ -67,10 +72,6 @@ for (let i = 0; i < aspectRatios.length; i++) {
 const galleryNewItems = galleryNew.querySelectorAll("div");
 container.appendChild(galleryNew);
 
-const info = document.createElement("p");
-info.id = "info";
-container.appendChild(info);
-
 let containerWidth = 0;
 
 function updateGallery() {
@@ -79,7 +80,7 @@ function updateGallery() {
   containerWidth = container.getBoundingClientRect().width;
 
   rowHeight = containerWidth < 850 ? 100 : 235;
-  info.innerHTML = `spacing: ${spacing}<br>rowHeight: ${rowHeight} ± ${heightTolerance} (${rowHeight - rowHeight * heightTolerance}..${rowHeight + rowHeight * heightTolerance})`;
+  info.innerHTML = `containerWidth: ${containerWidth}<br>spacing: ${spacing}<br>rowHeight: ${rowHeight} ± ${heightTolerance} (${rowHeight - rowHeight * heightTolerance}..${rowHeight + rowHeight * heightTolerance})`;
 
   // justified-layout
   const layoutFlickr = justifiedLayout(aspectRatios, {
