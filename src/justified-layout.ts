@@ -50,10 +50,10 @@ export class JustifiedLayout {
 }
 
 function getJustifiedLayout(aspectRatios: number[], options: LayoutOptions) {
-  const positions: number[] = Array.from({
-    length: aspectRatios.length * 4 + 4,
-  });
-  const minRowHeight = options.rowHeight * (1 - options.heightTolerance);
+  if (aspectRatios.length === 0) return [];
+
+  const positions: number[] = Array.from({ length: aspectRatios.length * 4 + 4 });
+  const minRowHeight = Math.max(options.rowHeight * (1 - options.heightTolerance), 0);
   const maxRowHeight = options.rowHeight * (1 + options.heightTolerance);
   let curAspectRatio = 0;
   let rowAspectRatio = 0;
